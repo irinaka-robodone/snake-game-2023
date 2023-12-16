@@ -1,11 +1,20 @@
 import pyxel
 import random
 
+
+
 class SnakeGame:
     def __init__(self):
         pyxel.init(160, 120)
         self.reset_game()
+        self.board = [[0 for _ in range(8)] for _ in range(8)]
+        self.board[4][4] = 1
+        self.board[4][5] = 2
+        self.board[5][4] = 2
+        self.board[5][5] = 1
+        
         pyxel.run(self.update, self.draw)
+        
 
     def reset_game(self):
         self.snake = [(10, 10)]
@@ -56,14 +65,7 @@ class SnakeGame:
         if pyxel.btnp(pyxel.KEY_LEFT): self.direction = (-1, 0)
         if pyxel.btnp(pyxel.KEY_RIGHT): self.direction = (1, 0)
         if pyxel.btnp(pyxel.KEY_UP): self.direction = (0, -1)
-        if pyxel.btnp(pyxel.KEY_DOWN): self.direction = (0, 1)
-
-    def draw(self):
-        pyxel.cls(0)
-        if self.game_over:
-            pyxel.text(55, 45, "GAME OVER", pyxel.frame_count % 16)
-            pyxel.text(48, 55, "Press R to Restart", 7)
-            return
+        if pyxel.btnp(pyxel.KEY_DOWN): self.direction =
 
         for x, y in self.snake:
             pyxel.rect(x, y, 1, 1, 11)
@@ -71,5 +73,7 @@ class SnakeGame:
 
         pyxel.text(5, 5, f"Score: {self.score}", 7)
         pyxel.text(5, 15, f"Time: {int(self.timer)}", 7)
+        
+    
 
 SnakeGame()
