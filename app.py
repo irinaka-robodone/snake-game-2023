@@ -6,7 +6,7 @@ import random
 class SnakeGame:
     def __init__(self):
         # Pyxelウィンドウの初期化（160x120のサイズで）
-        pyxel.init(160, 120)
+        pyxel.init(50, 50)
         # ゲームの初期状態を設定
         self.reset_game()
         # Pyxelのアップデート（ロジック）とドロー（描画）メソッドを設定
@@ -28,7 +28,7 @@ class SnakeGame:
     def spawn_food(self):
         # 食べ物をランダムな位置に生成
         while True:
-            food = (random.randint(0, 159), random.randint(0, 119))
+            food = (random.randint(0, 49), random.randint(0, 49))
             # ヘビの体と重ならない位置に食べ物を配置
             if food not in self.snake:
                 return food
@@ -81,16 +81,16 @@ class SnakeGame:
             pyxel.text(48, 55, "Press R to Restart", 7)
             return
 
+
+        # スコアとタイマーの表示
+        pyxel.text(2.5, 2.5, f"Score: {self.score}", 7)
+        pyxel.text(2.5,2.5, f"Score: {self.score}", 7)
+        pyxel.text(2.5, 7.5, f"Time: {int(self.timer)}", 7)
+        
+    
         # ヘビと食べ物の描画
         for x, y in self.snake:
             pyxel.rect(x, y, 1, 1, 11)
         pyxel.rect(self.food[0], self.food[1], 1, 1, 8)
-
-        # スコアとタイマーの表示
-        pyxel.text(5, 5, f"Score: {self.score}", 7)
-        pyxel.text(5, 5, f"Score: {self.score}", 7)
-        pyxel.text(5, 15, f"Time: {int(self.timer)}", 7)
-        
-    
 
 SnakeGame()
