@@ -6,10 +6,12 @@ import random
 class SnakeGame:
     def __init__(self):
         # Pyxelウィンドウの初期化（160x120のサイズで）
-        pyxel.init(40, 40, fps=60)
+        self.width = 100
+        self.height = 100
+        pyxel.init(self.width, self.height, fps=60)
         # ゲームの初期状態を設定
-        self.speed = 3 # 蛇の速度
-        
+        self.speed = 5 # 蛇の速度
+        self.food_count = 100000 # 食べ物の数
         self.reset_game()
         # Pyxelのアップデート（ロジック）とドロー（描画）メソッドを設定
         pyxel.run(self.update, self.draw)
@@ -25,14 +27,15 @@ class SnakeGame:
         self.score = 0
         self.game_over = False
         # ゲームのタイマーを設定（30秒）
-        self.timer = 60
+        self.timer = 30
         self.frame_counter = 0
+        self.foods = [self.spawn_food() for _ in range(self.food_count)]
 
 
     def spawn_food(self):
         # 食べ物をランダムな位置に生成
         while True:
-            food = (random.randint(0, 39), random.randint(0, 39))
+            food = (random.randint(0, self.width), random.randint(0, self.height))
             # ヘビの体と重ならない位置に食べ物を配置
             if food not in self.snake:
                 return food
@@ -43,6 +46,9 @@ class SnakeGame:
         # 一定のフレーム間隔でヘビを更新
         if self.frame_counter % self.speed == 0:
             self.update_snake()
+        
+        if self.timer <=0:
+            self.game_over = True
         
         if self.frame_counter % 60 == 0:
             self.timer -= 1
@@ -55,13 +61,15 @@ class SnakeGame:
                 return
 
         # ヘビの頭が食べ物に触れた場合の処理
-        if self.snake[0] == self.food:
-            self.score += 1
-            self.timer += 10
-            # ヘビの長さを増やす
-            self.snake.append(self.snake[-1])
-            # 新しい食べ物を生成
-            self.food = self.spawn_food()
+        for food in self.foods:
+        
+            if self.snake[0] == food:
+                self.score += 1
+                self.timer += 10
+                # ヘビの長さを増やす
+                self.snake.append(self.snake[-1])
+                self.foods.remove(food)  # 食べ物を消費
+                self.foods.append(self.spawn_food())  # 新しい食べ物を追加
 
         # スコアが一定値に達した時のステージ変更は省略
 
@@ -89,8 +97,8 @@ class SnakeGame:
         pyxel.cls(0)
         # ゲームオーバー時の表示
         if self.game_over:
-            pyxel.text(55, 45, "GAME OVER", pyxel.frame_count % 16)
-            pyxel.text(48, 55, "Press R to Restart", 7)
+            pyxel.text(5, 0, "GAME OVER", pyxel.frame_count % 16)
+            pyxel.text(5, 20, "Press R to Restart", 7)
             return
 
 
@@ -103,6 +111,8 @@ class SnakeGame:
         # ヘビと食べ物の描画
         for x, y in self.snake:
             pyxel.rect(x, y, 1, 1, 11)
-        pyxel.rect(self.food[0], self.food[1], 1, 1, 8)
-
+        
+        for food in self.foods:
+            pyxel.rect(food[0], food[1], 1, 1, 8)
+# foods = ["banana", "apple", "banna"]
 SnakeGame()
