@@ -6,13 +6,16 @@ import random
 class SnakeGame:
     def __init__(self):
         # Pyxelウィンドウの初期化（160x120のサイズで）
-        self.width = 100
-        self.height = 100
+        self.width = 50
+        self.height = 50
         pyxel.init(self.width, self.height, fps=60)
         # ゲームの初期状態を設定
-        self.speed = 5 # 蛇の速度
-        self.food_count = 100000 # 食べ物の数
+        self.speed = 3 # 蛇の速度
+        self.food_count = 60 # 食べ物の数
         self.reset_game()
+        self.stage = 1  # ステージの初期化
+        self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
+        
         # Pyxelのアップデート（ロジック）とドロー（描画）メソッドを設定
         pyxel.run(self.update, self.draw)
         
@@ -28,8 +31,13 @@ class SnakeGame:
         self.game_over = False
         # ゲームのタイマーを設定（30秒）
         self.timer = 30
+        # self.obstacles = []
         self.frame_counter = 0
         self.foods = [self.spawn_food() for _ in range(self.food_count)]
+        if self.score > 2 and self.stage == 1:
+            self.stage = 2
+            self.change_stage()
+            
 
 
     def spawn_food(self):
@@ -39,6 +47,8 @@ class SnakeGame:
             # ヘビの体と重ならない位置に食べ物を配置
             if food not in self.snake:
                 return food
+            
+    
 
     def update(self):
         self.frame_counter += 1
@@ -59,7 +69,6 @@ class SnakeGame:
             if pyxel.btnp(pyxel.KEY_R):
                 self.reset_game()
                 return
-
         # ヘビの頭が食べ物に触れた場合の処理
         for food in self.foods:
         
@@ -71,8 +80,18 @@ class SnakeGame:
                 self.foods.remove(food)  # 食べ物を消費
                 self.foods.append(self.spawn_food())  # 新しい食べ物を追加
 
-        # スコアが一定値に達した時のステージ変更は省略
+        for obstacle in self.obstacles:
+            print(obstacle)
+            
 
+        # スコアが一定値に達した時のステージ変更は省略
+    def change_stage(self):
+        # ステージに応じた設定をここで行う
+        if self.stage == 2:
+            # 例：ステージ2の設定
+            pass
+        # ステージ2の障害物配置
+            self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
     def update_snake(self):
         
         # ヘビの新しい頭の位置を計算
@@ -91,16 +110,19 @@ class SnakeGame:
         if pyxel.btn(pyxel.KEY_RIGHT): self.direction = (1, 0)
         if pyxel.btn(pyxel.KEY_UP): self.direction = (0, -1)
         if pyxel.btn(pyxel.KEY_DOWN): self.direction = (0, 1)
-
+    
     def draw(self):
         # 画面をクリア
         pyxel.cls(0)
         # ゲームオーバー時の表示
         if self.game_over:
-            pyxel.text(5, 0, "GAME OVER", pyxel.frame_count % 16)
-            pyxel.text(5, 20, "Press R to Restart", 7)
+            pyxel.text(20, 5, "GAME OVER", pyxel.frame_count % 16)
+            pyxel.text(10, 20, "Press R to Restart", 7)
             return
 
+        # ヘビが障害物に触れたか確認
+        if self.snake[0] in self.obstacles:
+            self.game_over = True
 
         # スコアとタイマーの表示
         pyxel.text(2.5, 2.5, f"Score: {self.score}", 7)
@@ -114,5 +136,10 @@ class SnakeGame:
         
         for food in self.foods:
             pyxel.rect(food[0], food[1], 1, 1, 8)
+
+        # 障害物の描画
+        for obstacle in self.obstacles:
+            pyxel.rect(obstacle[0], obstacle[1], 1, 1, 9)  # 例えば、青色で障害物を描画
+
 # foods = ["banana", "apple", "banna"]
 SnakeGame()
