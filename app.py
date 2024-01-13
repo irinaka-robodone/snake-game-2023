@@ -6,16 +6,16 @@ import random
 class SnakeGame:
     def __init__(self):
         # Pyxelウィンドウの初期化（160x120のサイズで）
-        self.width = 50
-        self.height = 50
+        self.width = 40
+        self.height = 40
         pyxel.init(self.width, self.height, fps=60)
         # ゲームの初期状態を設定
         self.speed = 3 # 蛇の速度
-        self.food_count = 60 # 食べ物の数
+        self.food_count = 20 # 食べ物の数
         self.reset_game()
         self.stage = 1  # ステージの初期化
-        self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
-        
+        # self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
+        self.obstacles = []
         # Pyxelのアップデート（ロジック）とドロー（描画）メソッドを設定
         pyxel.run(self.update, self.draw)
         
@@ -34,7 +34,7 @@ class SnakeGame:
         # self.obstacles = []
         self.frame_counter = 0
         self.foods = [self.spawn_food() for _ in range(self.food_count)]
-        if self.score > 2 and self.stage == 1:
+        if self.score > 25 and self.stage == 1:
             self.stage = 2
             self.change_stage()
             
@@ -74,7 +74,7 @@ class SnakeGame:
         
             if self.snake[0] == food:
                 self.score += 1
-                self.timer += 10
+                self.timer += 1
                 # ヘビの長さを増やす
                 self.snake.append(self.snake[-1])
                 self.foods.remove(food)  # 食べ物を消費
@@ -87,11 +87,11 @@ class SnakeGame:
         # スコアが一定値に達した時のステージ変更は省略
     def change_stage(self):
         # ステージに応じた設定をここで行う
-        if self.stage == 2:
+        if self.stage < 2:
             # 例：ステージ2の設定
-            pass
+            return
         # ステージ2の障害物配置
-            self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
+        self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
     def update_snake(self):
         
         # ヘビの新しい頭の位置を計算
@@ -138,6 +138,7 @@ class SnakeGame:
             pyxel.rect(food[0], food[1], 1, 1, 8)
 
         # 障害物の描画
+        
         for obstacle in self.obstacles:
             pyxel.rect(obstacle[0], obstacle[1], 1, 1, 9)  # 例えば、青色で障害物を描画
 
