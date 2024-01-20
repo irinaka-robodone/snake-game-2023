@@ -1,54 +1,48 @@
 import pyxel
 import random
 
-
-
 class SnakeGame:
     def __init__(self):
-        # Pyxelウィンドウの初期化（160x120のサイズで）
+        # Pyxelウィンドウの初期化（40x40のサイズで、フレームレートは60）
         self.width = 40
-        self.height = 40
+        self.height = 60
         pyxel.init(self.width, self.height, fps=60)
-        # ゲームの初期状態を設定
-        self.speed = 3 # 蛇の速度
-        self.food_count = 20 # 食べ物の数
-        self.reset_game()
-        self.stage = 1  # ステージの初期化
-        # self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
-        self.obstacles = []
-        # Pyxelのアップデート（ロジック）とドロー（描画）メソッドを設定
+
+        # ゲームの初期状態の設定
+        self.speed = 2  # 蛇の移動速度
+        self.food_count = 100  # 食べ物の数
+        self.reset_game()  # ゲームのリセット
+        self.stage = 1  # ステージの初期設定
+        self.obstacles = []  # 障害物の初期リスト
+
+        # Pyxelのアップデート（ゲームロジック）とドロー（描画）メソッドの設定
         pyxel.run(self.update, self.draw)
-        
 
     def reset_game(self):
-        # ヘビの初期位置と初期方向を設定
+        # ヘビの初期位置と方向の設定
         self.snake = [(10, 10)]
         self.direction = (1, 0)
+
         # 食べ物の初期位置を生成
-        self.food = self.spawn_food()
-        # スコアとゲームオーバーフラグの初期化
+        self.foods = [self.spawn_food() for _ in range(self.food_count)]
+
+        # スコア、ゲームオーバーフラグ、タイマーの初期化
         self.score = 0
         self.game_over = False
-        # ゲームのタイマーを設定（30秒）
-        self.timer = 30
-        # self.obstacles = []
+        self.timer = 60
         self.frame_counter = 0
-        self.foods = [self.spawn_food() for _ in range(self.food_count)]
-        if self.score > 25 and self.stage == 1:
+
+        # ステージ2への変更処理（スコアが20を超えたら）
+        if self.score > 20 and self.stage == 1:
             self.stage = 2
             self.change_stage()
-            
-
 
     def spawn_food(self):
-        # 食べ物をランダムな位置に生成
+        # 食べ物をランダムな位置に生成（ヘビの体と重ならない位置）
         while True:
-            food = (random.randint(0, self.width), random.randint(0, self.height))
-            # ヘビの体と重ならない位置に食べ物を配置
+            food = (random.randint(0, self.width-1), random.randint(0, self.height-1))
             if food not in self.snake:
                 return food
-            
-    
 
     def update(self):
         self.frame_counter += 1
@@ -56,50 +50,43 @@ class SnakeGame:
         # 一定のフレーム間隔でヘビを更新
         if self.frame_counter % self.speed == 0:
             self.update_snake()
-        
-        if self.timer <=0:
+
+        # タイマーとゲームオーバーの処理
+        if self.timer <= 0:
             self.game_over = True
-        
         if self.frame_counter % 60 == 0:
             self.timer -= 1
 
-        # ゲームオーバー時の処理
+        # ゲームオーバー時のリセット処理
         if self.game_over:
-            # Rキーでゲームをリセット
             if pyxel.btnp(pyxel.KEY_R):
                 self.reset_game()
                 return
-        # ヘビの頭が食べ物に触れた場合の処理
+
+        # ヘビが食べ物に触れた場合の処理
         for food in self.foods:
-        
             if self.snake[0] == food:
                 self.score += 1
                 self.timer += 1
-                # ヘビの長さを増やす
                 self.snake.append(self.snake[-1])
-                self.foods.remove(food)  # 食べ物を消費
-                self.foods.append(self.spawn_food())  # 新しい食べ物を追加
+                self.foods.remove(food)
+                self.foods.append(self.spawn_food())
 
-        for obstacle in self.obstacles:
-            print(obstacle)
-            
-
-        # スコアが一定値に達した時のステージ変更は省略
     def change_stage(self):
-        # ステージに応じた設定をここで行う
+        # ステージに応じた設定
         if self.stage < 2:
-            # 例：ステージ2の設定
             return
-        # ステージ2の障害物配置
-        self.obstacles = [(random.randint(0, self.width), random.randint(0, self.height)) for _ in range(10)]
+        # ステージ2での障害物の配置
+        self.obstacles = [(random.randint(0, self.width-1), random.randint(0, self.height-1)) for _ in range(10)]
+
     def update_snake(self):
-        
         # ヘビの新しい頭の位置を計算
-        new_head_x = (self.snake[0][0] + self.direction[0]) % pyxel.width
-        new_head_y = (self.snake[0][1] + self.direction[1]) % pyxel.height
+        new_head_x = (self.snake[0][0] + self.direction[0]) % self.width
+        new_head_y = (self.snake[0][1] + self.direction[1]) % self.height
         new_head = (new_head_x, new_head_y)
-        # ヘビが自分自身に触れた場合、ゲームオーバー
-        if new_head in self.snake[1:]:
+
+        # ヘビが自分自身または障害物に触れた場合のゲームオーバー処理
+        if new_head in self.snake[1:] or new_head in self.obstacles:
             self.game_over = True
 
         # ヘビの位置を更新
@@ -110,37 +97,36 @@ class SnakeGame:
         if pyxel.btn(pyxel.KEY_RIGHT): self.direction = (1, 0)
         if pyxel.btn(pyxel.KEY_UP): self.direction = (0, -1)
         if pyxel.btn(pyxel.KEY_DOWN): self.direction = (0, 1)
-    
+
     def draw(self):
         # 画面をクリア
         pyxel.cls(0)
+
         # ゲームオーバー時の表示
         if self.game_over:
             pyxel.text(20, 5, "GAME OVER", pyxel.frame_count % 16)
             pyxel.text(10, 20, "Press R to Restart", 7)
             return
 
-        # ヘビが障害物に触れたか確認
-        if self.snake[0] in self.obstacles:
-            self.game_over = True
-
         # スコアとタイマーの表示
         pyxel.text(2.5, 2.5, f"Score: {self.score}", 7)
-        pyxel.text(2.5,2.5, f"Score: {self.score}", 7)
         pyxel.text(2.5, 7.5, f"Time: {int(self.timer)}", 7)
-        
-    
-        # ヘビと食べ物の描画
-        for x, y in self.snake:
-            pyxel.rect(x, y, 1, 1, 11)
-        
+
+        color_list = [7,8,9,10,11,12,13,14,15,16,17]  # 例えば、これらの色を使用
+        for i, (x, y) in enumerate(self.snake):
+            color = color_list[i % len(color_list)]  # 色リストから色を選択
+            pyxel.rect(x, y, 1, 1, color)
+
+
+        # # ヘビと食べ物の描画
+        # for x, y in self.snake:
+        #     pyxel.rect(x, y, 1, 1, 11)  # ヘビ
         for food in self.foods:
-            pyxel.rect(food[0], food[1], 1, 1, 8)
+            pyxel.rect(food[0], food[1], 1, 1, 8)  # 食べ物
 
         # 障害物の描画
-        
         for obstacle in self.obstacles:
-            pyxel.rect(obstacle[0], obstacle[1], 1, 1, 9)  # 例えば、青色で障害物を描画
+            pyxel.rect(obstacle[0], obstacle[1], 1, 1, 9)  # 障害物
 
-# foods = ["banana", "apple", "banna"]
+# ゲームの実行
 SnakeGame()
