@@ -4,17 +4,17 @@ import random
 class SnakeGame:
     def __init__(self):
         # Pyxelウィンドウの初期化（40x40のサイズで、フレームレートは60）
-        self.width = 40
-        self.height = 60
+        self.width = 50
+        self.height = 50
         pyxel.init(self.width, self.height, fps=60)
 
         # ゲームの初期状態の設定
         self.speed = 2  # 蛇の移動速度
-        self.food_count = 100  # 食べ物の数
+        self.food_count = 40    # 食べ物の数
         self.reset_game()  # ゲームのリセット
         self.stage = 1  # ステージの初期設定
         self.obstacles = []  # 障害物の初期リスト
-
+        self.bg_color_change_speed = 0.005
         # Pyxelのアップデート（ゲームロジック）とドロー（描画）メソッドの設定
         pyxel.run(self.update, self.draw)
 
@@ -102,6 +102,11 @@ class SnakeGame:
         # 画面をクリア
         pyxel.cls(0)
 
+    def draw(self):
+        # 背景色の設定
+        bg_color = int(pyxel.frame_count * self.bg_color_change_speed) %  16  # フレームカウントによる色の変更
+        pyxel.cls(bg_color)
+
         # ゲームオーバー時の表示
         if self.game_over:
             pyxel.text(20, 5, "GAME OVER", pyxel.frame_count % 16)
@@ -112,7 +117,7 @@ class SnakeGame:
         pyxel.text(2.5, 2.5, f"Score: {self.score}", 7)
         pyxel.text(2.5, 7.5, f"Time: {int(self.timer)}", 7)
 
-        color_list = [7,8,9,10,11,12,13,14,15,16,17]  # 例えば、これらの色を使用
+        color_list = [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]  # 例えば、これらの色を使用
         for i, (x, y) in enumerate(self.snake):
             color = color_list[i % len(color_list)]  # 色リストから色を選択
             pyxel.rect(x, y, 1, 1, color)
