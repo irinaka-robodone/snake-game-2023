@@ -14,7 +14,7 @@ class SnakeGame:
         self.reset_game()  # ゲームのリセット
         self.stage = 1  # ステージの初期設定
         self.obstacles = []  # 障害物の初期リスト
-        self.bg_color_change_speed = 0.005
+        self.bg_color_change_speed = 0.001
         # Pyxelのアップデート（ゲームロジック）とドロー（描画）メソッドの設定
         pyxel.run(self.update, self.draw)
 
@@ -37,6 +37,19 @@ class SnakeGame:
             self.stage = 2
             self.change_stage()
 
+    def draw(self):
+        # フレームカウントに基づいて背景色を決定（赤、緑、青の順に変更）
+        bg_color_index = (pyxel.frame_count // 60) % 3
+        if bg_color_index == 0:
+            bg_color = 8   # 赤
+        elif bg_color_index == 1:
+            bg_color = 9  # 緑
+        else:
+            bg_color = 10  # 青
+
+
+
+        pyxel.cls(bg_color)
     def spawn_food(self):
         # 食べ物をランダムな位置に生成（ヘビの体と重ならない位置）
         while True:
@@ -133,5 +146,5 @@ class SnakeGame:
         for obstacle in self.obstacles:
             pyxel.rect(obstacle[0], obstacle[1], 1, 1, 9)  # 障害物
 
-# ゲームの実行
 SnakeGame()
+# ゲームの実行
