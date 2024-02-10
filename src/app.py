@@ -4,13 +4,13 @@ import random
 class SnakeGame:
     def __init__(self):
         # Pyxelウィンドウの初期化（40x40のサイズで、フレームレートは60）
-        self.width = 50
-        self.height = 50
+        self.width = 90
+        self.height = 45
         pyxel.init(self.width, self.height, fps=60)
 
         # ゲームの初期状態の設定
         self.speed = 2  # 蛇の移動速度
-        self.food_count = 40    # 食べ物の数
+        self.food_count = 9    # 食べ物の数
         self.reset_game()  # ゲームのリセット
         self.stage = 1  # ステージの初期設定
         self.obstacles = []  # 障害物の初期リスト
@@ -41,20 +41,23 @@ class SnakeGame:
         # フレームカウントに基づいて背景色を決定（赤、緑、青の順に変更）
         bg_color_index = (pyxel.frame_count // 60) % 3
         if bg_color_index == 0:
-            bg_color = 8   # 赤
+            bg_color = 6   # 赤
         elif bg_color_index == 1:
             bg_color = 9  # 緑
         else:
-            bg_color = 10  # 青
+            bg_color = 6  # 青
 
 
 
         pyxel.cls(bg_color)
     def spawn_food(self):
-        # 食べ物をランダムな位置に生成（ヘビの体と重ならない位置）
+    # 食べ物をランダムな位置に生成（ヘビの体と重ならない位置）
         while True:
-            food = (random.randint(0, self.width-1), random.randint(0, self.height-1))
-            if food not in self.snake:
+            x = random.randint(0, self.width-1)
+            y = random.randint(0, self.height-1)
+            color = random.randint(1, 15)  # 色を1から15の間でランダムに選択
+            food = (x, y, color)  # 食べ物の情報に色を追加
+            if food[:2] not in [f[:2] for f in self.foods] and food[:2] not in self.snake:
                 return food
 
     def update(self):
@@ -124,13 +127,14 @@ class SnakeGame:
         if self.game_over:
             pyxel.text(20, 5, "GAME OVER", pyxel.frame_count % 16)
             pyxel.text(10, 20, "Press R to Restart", 7)
+            pyxel.text(1,35,f"score:{self.score}",7)
             return
 
         # スコアとタイマーの表示
         pyxel.text(2.5, 2.5, f"Score: {self.score}", 7)
         pyxel.text(2.5, 7.5, f"Time: {int(self.timer)}", 7)
 
-        color_list = [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]  # 例えば、これらの色を使用
+        color_list = [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]  # 例えば、これらの色を使用
         for i, (x, y) in enumerate(self.snake):
             color = color_list[i % len(color_list)]  # 色リストから色を選択
             pyxel.rect(x, y, 1, 1, color)
