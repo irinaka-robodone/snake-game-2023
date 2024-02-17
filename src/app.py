@@ -11,6 +11,7 @@ class SnakeGame:
         # ゲームの初期状態の設定
         self.speed = 2  # 蛇の移動速度
         self.food_count = 9    # 食べ物の数
+        self.foods = []
         self.reset_game()  # ゲームのリセット
         self.stage = 1  # ステージの初期設定
         self.obstacles = []  # 障害物の初期リスト
@@ -46,17 +47,25 @@ class SnakeGame:
             bg_color = 9  # 緑
         else:
             bg_color = 6  # 青
-
-
-
         pyxel.cls(bg_color)
+
+    def update(self):
+        self.frame_counter += 1
+        if self.frame_counter % self.speed == 0:
+            self.update_snake()
+
+            
     def spawn_food(self):
     # 食べ物をランダムな位置に生成（ヘビの体と重ならない位置）
         while True:
             x = random.randint(0, self.width-1)
             y = random.randint(0, self.height-1)
             color = random.randint(1, 15)  # 色を1から15の間でランダムに選択
-            food = (x, y, color)  # 食べ物の情報に色を追加
+            esa_rand = random.random()
+            kind_food = "esa"
+            if esa_rand < 0.2:
+                kind_food = "doku"
+            food = [x, y, color, kind_food]  # 食べ物の情報に色を追加
             if food[:2] not in [f[:2] for f in self.foods] and food[:2] not in self.snake:
                 return food
 
@@ -79,15 +88,20 @@ class SnakeGame:
                 self.reset_game()
                 return
 
-        # ヘビが食べ物に触れた場合の処理
         for food in self.foods:
-            if self.snake[0] == food:
+            if self.snake[0] == food[:2]:  # 食べ物の位置を確認
                 self.score += 1
                 self.timer += 1
-                self.snake.append(self.snake[-1])
+                # food の種類によって、ヘビの長さを伸ばしたり短くしたりする。
+                if food[3] == "doku":  # 食べ物が体を短くする効果を持つ場合
+                    if len(self.snake) > 1:
+                        self.snake.pop()  # ヘビの長さを1つ減らす
+                else:
+                    self.snake.append(self.snake[-1])  # 通常の食べ物の場合は長さを増やす
                 self.foods.remove(food)
                 self.foods.append(self.spawn_food())
-
+                return
+            
     def change_stage(self):
         # ステージに応じた設定
         if self.stage < 2:
