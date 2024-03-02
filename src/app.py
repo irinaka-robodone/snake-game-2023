@@ -15,7 +15,9 @@ class SnakeGame:
         self.reset_game()  # ゲームのリセット
         self.stage = 1  # ステージの初期設定
         self.obstacles = []  # 障害物の初期リスト
-        self.bg_color_change_speed = 0.001
+        self.bg_color_change_speed = 0.005
+        pyxel.load("resource.pyxres")
+        pyxel.play(0, 0)
         # Pyxelのアップデート（ゲームロジック）とドロー（描画）メソッドの設定
         pyxel.run(self.update, self.draw)
 
@@ -37,34 +39,26 @@ class SnakeGame:
         if self.score > 20 and self.stage == 1:
             self.stage = 2
             self.change_stage()
-
-    def draw(self):
-        # フレームカウントに基づいて背景色を決定（赤、緑、青の順に変更）
-        bg_color_index = (pyxel.frame_count // 60) % 3
-        if bg_color_index == 0:
-            bg_color = 6   # 赤
-        elif bg_color_index == 1:
-            bg_color = 9  # 緑
-        else:
-            bg_color = 6  # 青
-        pyxel.cls(bg_color)
-
-    def update(self):
-        self.frame_counter += 1
-        if self.frame_counter % self.speed == 0:
-            self.update_snake()
-
             
     def spawn_food(self):
     # 食べ物をランダムな位置に生成（ヘビの体と重ならない位置）
         while True:
             x = random.randint(0, self.width-1)
             y = random.randint(0, self.height-1)
-            color = random.randint(1, 15)  # 色を1から15の間でランダムに選択
+            
             esa_rand = random.random()
             kind_food = "esa"
+            color = 8
             if esa_rand < 0.2:
                 kind_food = "doku"
+            elif esa_rand < 0.3:
+                kind_food = "mumi"
+            if kind_food == "esa":
+                color = 8
+            elif kind_food == "doku":
+                color =7
+            elif kind_food == "mumi":
+                color = 6
             food = [x, y, color, kind_food]  # 食べ物の情報に色を追加
             if food[:2] not in [f[:2] for f in self.foods] and food[:2] not in self.snake:
                 return food
@@ -87,13 +81,18 @@ class SnakeGame:
             if pyxel.btnp(pyxel.KEY_R):
                 self.reset_game()
                 return
+        
+        print("snake[0]:", self.snake[0])
+        print("self.foods[0][:2]", self.foods[0][:2])
 
         for food in self.foods:
-            if self.snake[0] == food[:2]:  # 食べ物の位置を確認
+            head = list(self.snake[0])
+            if head == food[:2]:  # 食べ物の位置を確認
                 self.score += 1
-                self.timer += 1
+                self.timer += 15
                 # food の種類によって、ヘビの長さを伸ばしたり短くしたりする。
                 if food[3] == "doku":  # 食べ物が体を短くする効果を持つ場合
+                    print(food)
                     if len(self.snake) > 1:
                         self.snake.pop()  # ヘビの長さを1つ減らす
                 else:
@@ -127,21 +126,25 @@ class SnakeGame:
         if pyxel.btn(pyxel.KEY_RIGHT): self.direction = (1, 0)
         if pyxel.btn(pyxel.KEY_UP): self.direction = (0, -1)
         if pyxel.btn(pyxel.KEY_DOWN): self.direction = (0, 1)
-
-    def draw(self):
-        # 画面をクリア
-        pyxel.cls(0)
-
+        
     def draw(self):
         # 背景色の設定
-        bg_color = int(pyxel.frame_count * self.bg_color_change_speed) %  16  # フレームカウントによる色の変更
+        bg_color_id = int(pyxel.frame_count * self.bg_color_change_speed) %  4  # フレームカウントによる色の変更
+        if bg_color_id == 0:
+            bg_color = 7
+        elif bg_color_id == 1:
+            bg_color = 6
+        elif bg_color_id == 2:
+            bg_color = 8
+        else:
+            bg_color= 10
+            
         pyxel.cls(bg_color)
-
         # ゲームオーバー時の表示
         if self.game_over:
             pyxel.text(20, 5, "GAME OVER", pyxel.frame_count % 16)
-            pyxel.text(10, 20, "Press R to Restart", 7)
-            pyxel.text(1,35,f"score:{self.score}",7)
+            pyxel.text(10, 20, "Press R to Restart", 11)
+            pyxel.text(1,35,f"score:{self.score}",11)
             return
 
         # スコアとタイマーの表示
@@ -152,13 +155,11 @@ class SnakeGame:
         for i, (x, y) in enumerate(self.snake):
             color = color_list[i % len(color_list)]  # 色リストから色を選択
             pyxel.rect(x, y, 1, 1, color)
-
-
         # # ヘビと食べ物の描画
         # for x, y in self.snake:
         #     pyxel.rect(x, y, 1, 1, 11)  # ヘビ
         for food in self.foods:
-            pyxel.rect(food[0], food[1], 1, 1, 8)  # 食べ物
+            pyxel.rect(food[0], food[1], 1, 1, food[2])  # 食べ物
 
         # 障害物の描画
         for obstacle in self.obstacles:
