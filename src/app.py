@@ -4,8 +4,8 @@ import random
 class SnakeGame:
     def __init__(self):
         # Pyxelウィンドウの初期化（40x40のサイズで、フレームレートは60）
-        self.width = 90
-        self.height = 45
+        self.width = 60
+        self.height =60
         pyxel.init(self.width, self.height, fps=60)
 
         # ゲームの初期状態の設定
